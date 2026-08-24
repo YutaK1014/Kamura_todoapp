@@ -5,8 +5,9 @@
 この設計書は、Todo管理アプリで使用するデータベース（データを保存する仕組み）の設計を定めるものです。
 
 - データベース: MySQL
-- 使用テーブル（データを表形式で保存する場所）: `todos` の1つだけ
+- 使用テーブル（データを表形式で保存する場所）: `todos` と `operation_logs` の2つ
 - 1行（レコード、1件分のTodo）が1件のTodoを表す
+- `operation_logs` の1行（レコード、1件分の操作記録）が1回の登録・編集・削除を表す
 - 利用者は1人で、ログイン機能は作らない
 
 画面の見た目や画面遷移は、別の画面設計書で定めます。
@@ -16,6 +17,7 @@
 | テーブル名 | 役割 |
 |---|---|
 | `todos` | Todoのタイトル、メモ、分類、優先度、期限、完了状態などを保存する |
+| `operation_logs` | 登録・編集・削除の種類と対象Todoの番号を保存する |
 
 ## 3. `todos`テーブル定義
 
@@ -26,16 +28,25 @@
 | カラム名 | データ型 | NULL | 初期値 | 制約・説明 |
 |---|---|---|---|---|
 | `id` | `BIGINT` | 不可 | 自動採番 | 主キー。Todoを識別する番号。画面からは入力しない |
-| `title` | `VARCHAR(255)` | 不可 | なし | 「やること」。1～255文字。前後の空白だけは入力エラーとする |
+| `title` | `VARCHAR(255)` | 不可 | なし | 「やること」。1～255文字。半角の空白だけ、または全角の空白だけの入力はエラーとする |
 | `detail` | `VARCHAR(255)` | 可 | `NULL` | メモ。未入力を許可し、最大255文字 |
-| `category` | `VARCHAR(255)` | 不可 | なし | 分類。次の5種類から選択: デザイン、マーケティング、プログラミング、資格、私生活 |
+| `category` | `VARCHAR(255)` | 不可 | なし | 分類。次の5種類から選択: デザイン、マーケティング、プログラミング、資格、就職活動 |
 | `priority` | `INT` | 不可 | `2` | 優先度。`1`=高、`2`=中、`3`=低 |
 | `due_date` | `DATE` | 可 | `NULL` | 期限。未入力を許可。時刻は持たず、日付だけを保存 |
 | `completed` | `BOOLEAN` | 不可 | `FALSE` | 完了状態。`TRUE`=完了、`FALSE`=未完了 |
 | `created_at` | `DATETIME` | 不可 | 現在日時 | 登録日時。データベースが自動設定し、画面からは入力しない |
 | `updated_at` | `DATETIME` | 不可 | 現在日時 | 最終更新日時。登録時と更新時にデータベースが自動設定し、画面からは入力しない |
 
-### 3.2 カラムと要件の対応
+### 3.2 `operation_logs`テーブル定義
+
+| カラム名 | データ型 | NULL | 初期値 | 制約・説明 |
+|---|---|---|---|---|
+| `id` | `BIGINT` | 不可 | 自動採番 | 主キー。ログを識別する番号 |
+| `action` | `VARCHAR(10)` | 不可 | なし | 操作の種類。`登録`、`編集`、`削除`のいずれか |
+| `todo_id` | `BIGINT` | 不可 | なし | 対象Todoの`id`。削除後もログを残せるよう、外部キー（別表との連動設定）は付けない |
+| `created_at` | `DATETIME` | 不可 | 現在日時 | ログを記録した日時。データベースが自動設定 |
+
+### 3.3 カラムと要件の対応
 
 | 要件 | 対応するカラム | 対応内容 |
 |---|---|---|
@@ -50,7 +61,7 @@
 | 優先度を表示する | `priority` | `1`を「高」、`2`を「中」、`3`を「低」と表示する |
 | 登録・編集・削除の結果を表示する | `id`、`created_at`、`updated_at` | 対象の特定と保存結果の確認に利用する |
 
-### 3.3 値のルール
+### 3.4 値のルール
 
 - `category`は、次の5つ以外を保存しない。入力欄は自由入力ではなく選択式とする。
   - `デザイン`
@@ -81,11 +92,24 @@ CREATE TABLE todos (
 
     PRIMARY KEY (id),
     CONSTRAINT chk_todos_title_not_blank
-        CHECK (CHAR_LENGTH(TRIM(title)) > 0),
+        CHECK (CHAR_LENGTH(TRIM(REPLACE(title, '　', ''))) > 0),
     CONSTRAINT chk_todos_priority
         CHECK (priority IN (1, 2, 3)),
     CONSTRAINT chk_todos_category
         CHECK (category IN ('デザイン', 'マーケティング', 'プログラミング', '資格', '就職活動') )
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE operation_logs (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    action VARCHAR(10) NOT NULL,
+    todo_id BIGINT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    CONSTRAINT chk_operation_logs_action
+        CHECK (action IN ('登録', '編集', '削除'))
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
@@ -109,24 +133,22 @@ COLLATE=utf8mb4_unicode_ci;
 ```sql
 CREATE INDEX idx_todos_category ON todos (category);
 CREATE INDEX idx_todos_due_date ON todos (due_date);
+CREATE INDEX idx_operation_logs_todo_id ON operation_logs (todo_id);
 ```
 
 タイトル検索は「タイトルの途中に文字列を含むか」を調べる仕様で、通常は`LIKE '%検索文字%'`を使います。この検索方法では通常のインデックスを十分に利用できないため、まずは追加インデックスを作らず、データ量が増えた場合に検索方式を見直します。
 
 ## 6. 登録・更新・削除の扱い
 
-- 登録: `id`、`created_at`、`updated_at`は指定せず、その他の入力値を保存する。`completed`は未完了で登録する。
-- 更新: `id`で対象を特定し、入力されたTodoの内容と`completed`を更新する。`updated_at`は自動更新する。
-- 削除: `id`で対象を特定し、その行を削除する。削除後に元へ戻す機能や削除日時の保存は作らない。
+- 登録: `id`、`created_at`、`updated_at`は指定せず、その他の入力値を保存する。`completed`は未完了で登録する。保存後に`operation_logs`へ登録ログを1行追加する。
+- 更新: `id`で対象を特定し、入力されたTodoの内容と`completed`を更新する。`updated_at`は自動更新する。保存後に`operation_logs`へ編集ログを1行追加する。
+- 削除: `id`で対象を特定し、その行を削除する。削除前または削除と同時に`operation_logs`へ削除ログを1行追加する。削除後に元へ戻す機能や削除日時の保存は作らない。
 - 存在しない`id`を指定した場合: 対象なしとして一覧画面へ戻し、画面側で「見つかりませんでした」と表示する。
 
 ## 7. 対象外とするもの
 
-このアプリの使用テーブルは`todos`の1つだけという前提のため、次のテーブルは作成しません。
+このアプリでは、次のテーブルは作成しません。
 
 - 利用者・ログイン用テーブル
-- 操作ログ用テーブル
 - 分類マスタ（分類一覧を別管理するテーブル）
 - 添付ファイル用テーブル
-
-操作ログの要件がある場合も、別テーブルを追加せず、今回のDB設計の対象外とします。将来ログを保存する必要が生じた場合は、テーブルを1つだけとする前提を見直したうえで、別途設計します。
