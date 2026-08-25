@@ -10,4 +10,8 @@ public interface TodoMapper {
     List<Todo> findAll();
 
     void insert(Todo todo);
+
+    Todo findById(Long id);
+
+    void update(Todo todo);
 }

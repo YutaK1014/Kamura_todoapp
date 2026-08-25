@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
@@ -52,6 +53,40 @@ public class HomeController {
     public String create(@ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
         todoMapper.insert(todo);
         redirectAttributes.addFlashAttribute("message", "登録しました");
+        return "redirect:/todos";
+    }
+
+    @GetMapping("/todos/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Todo todo = todoMapper.findById(id);
+        if (todo == null) {
+            redirectAttributes.addFlashAttribute("message", "見つかりませんでした");
+            return "redirect:/todos";
+        }
+        model.addAttribute("todo", todo);
+        model.addAttribute("id", id);
+        return "edit";
+    }
+
+    @PostMapping("/todos/{id}/confirm")
+    public String editConfirm(@PathVariable Long id, @ModelAttribute Todo todo, Model model) {
+        model.addAttribute("todo", todo);
+        model.addAttribute("id", id);
+        return "edit-confirm";
+    }
+
+    @PostMapping("/todos/{id}/edit")
+    public String editRewrite(@PathVariable Long id, @ModelAttribute Todo todo, Model model) {
+        model.addAttribute("todo", todo);
+        model.addAttribute("id", id);
+        return "edit";
+    }
+
+    @PostMapping("/todos/{id}")
+    public String update(@PathVariable Long id, @ModelAttribute Todo todo, RedirectAttributes redirectAttributes) {
+        todo.setId(id);
+        todoMapper.update(todo);
+        redirectAttributes.addFlashAttribute("message", "保存しました");
         return "redirect:/todos";
     }
 }
