@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo削除確認</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <main class="container">
+        <h1 class="page-title">ToDo削除確認</h1>
+
+        <div class="form-row">
+            <p class="form-label">やること</p>
+            <p class="confirm-value" th:text="${#strings.isEmpty(todo.title) ? '（入力なし）' : todo.title}">やること</p>
+        </div>
+
+        <div class="form-row">
+            <p class="form-label">ジャンル</p>
+            <p class="confirm-value" th:text="${#strings.isEmpty(todo.category) ? '（入力なし）' : todo.category}">ジャンル</p>
+        </div>
+
+        <div class="form-row">
+            <p class="form-label">期限</p>
+            <p class="confirm-value" th:text="${todo.dueDate == null ? '（入力なし）' : todo.dueDate}">期限</p>
+        </div>
+
+        <div class="confirm-actions">
+            <form th:action="@{/todos/{id}/delete(id=${id})}" method="post">
+                <button class="btn" type="submit">消す</button>
+            </form>
+            <a class="btn sub" href="/todos">やめる</a>
+        </div>
+    </main>
+</body>
+</html>
