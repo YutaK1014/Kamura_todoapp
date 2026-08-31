@@ -1,0 +1,29 @@
+### 1. 1件登録する
+POST http://localhost:8080/api/todos
+Content-Type: application/json
+
+{
+  "title": "新しい企画を考える",
+  "category": "マーケティング",
+  "priority": 2,
+  "dueDate": "2026-09-15"
+}
+
+### 2. 1件取得する
+GET http://localhost:8080/api/todos/1
+
+### 3. 1件入れ替える
+PUT http://localhost:8080/api/todos/1
+Content-Type: application/json
+
+{
+  "title": "新しい企画を実行する",
+  "detail": "関連するサイトも確認する",
+  "category": "マーケティング",
+  "priority": 2,
+  "dueDate": "2026-09-15",
+  "completed": false
+}
+
+### 4. 1件削除する
+DELETE http://localhost:8080/api/todos/1
