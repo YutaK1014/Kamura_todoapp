@@ -7,7 +7,7 @@ POST http://localhost:8080/api/todos
 Content-Type: application/json
 
 {
-  "title": "",
+  "title": "a",
   "category": "マーケティング",
   "priority": 2,
   "dueDate": "2026-09-15"

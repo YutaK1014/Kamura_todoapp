@@ -1,11 +1,20 @@
 package com.example.todoapp.api;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.net.URI;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +56,8 @@ public class TodoApiController {
     }
 
     @PostMapping("/api/todos")
-    public ResponseEntity<TodoDto> create(@RequestBody Todo todo) {
+    public ResponseEntity<TodoDto> create(@Valid @RequestBody TodoRequest request) {
+        Todo todo = request.toTodo();
         if (todo.getCompleted() == null) {
             todo.setCompleted(false);
         }
@@ -58,11 +68,12 @@ public class TodoApiController {
     }
 
     @PutMapping("/api/todos/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Todo todo) {
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody TodoRequest request) {
         Todo existingTodo = todoService.findById(id);
         if (existingTodo == null) {
             return notFound(id);
         }
+        Todo todo = request.toTodo();
         todo.setId(id);
         todoService.update(todo);
         return ResponseEntity.ok(TodoDto.from(todoService.findById(id)));
@@ -85,5 +96,25 @@ public class TodoApiController {
         problem.setDetail("Todo with id " + id + " was not found.");
         problem.setInstance(URI.create("/api/todos/" + id));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    private ResponseEntity<ProblemDetail> badRequest(MethodArgumentNotValidException exception,
+            HttpServletRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setType(URI.create("about:blank"));
+        problem.setTitle("Bad Request");
+        problem.setDetail("入力に誤りがあります");
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        List<Map<String, String>> errors = new ArrayList<>();
+        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+            Map<String, String> error = new LinkedHashMap<>();
+            error.put("field", fieldError.getField());
+            error.put("message", fieldError.getDefaultMessage());
+            errors.add(error);
+        }
+        problem.setProperty("errors", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 }
