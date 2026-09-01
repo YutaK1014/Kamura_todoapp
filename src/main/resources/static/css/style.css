@@ -121,8 +121,17 @@ body {
 .calendar-navigation {
    display: flex;
    align-items: center;
-   justify-content: space-between;
    margin-bottom: 16px;
+}
+
+.calendar-navigation-left,
+.calendar-navigation-right {
+   display: flex;
+   gap: 12px;
+}
+
+.calendar-navigation-right {
+   margin-left: auto;
 }
 
 .calendar-heading {

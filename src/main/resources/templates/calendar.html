@@ -11,9 +11,15 @@
         <h1 class="page-title">カレンダー</h1>
 
         <nav class="calendar-navigation" aria-label="月の移動">
-            <a class="link" th:href="@{/calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}">前の月</a>
+            <div class="calendar-navigation-left">
+                <a class="link" th:href="@{/calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}">前の月</a>
+                <a class="link" th:href="@{/calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}">次の月</a>
+            </div>
             <h2 class="calendar-heading" th:text="${targetMonth.year + '年' + targetMonth.monthValue + '月'}">2026年4月</h2>
-            <a class="link" th:href="@{/calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}">次の月</a>
+            <div class="calendar-navigation-right">
+                <a class="link" href="/todos">表で見る</a>
+                <a class="link" href="/todos/new">新規登録</a>
+            </div>
         </nav>
 
         <table class="calendar-table"
@@ -55,7 +61,9 @@
                 cellTodos
                     .slice(0, 3)
                     .forEach(todo => {
-                        const title = document.createElement('div');
+                        const title = document.createElement('a');
+                        title.className = 'link';
+                        title.href = `/todos/${todo.id}/edit`;
                         title.textContent = todo.title;
                         if (todo.dueDate < today && !todo.completed) {
                             title.style.color = '#dc2626';
