@@ -117,3 +117,56 @@ body {
    color: #334155;
    text-decoration: underline;
 }
+
+.calendar-navigation {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-bottom: 16px;
+}
+
+.calendar-heading {
+   margin: 0;
+   color: #1e293b;
+   font-size: 22px;
+}
+
+.calendar-table {
+   width: 100%;
+   border-collapse: collapse;
+   table-layout: fixed;
+   border: 2px solid #64748b;
+}
+
+.calendar-table thead,
+.calendar-table tbody,
+.calendar-table tr {
+   display: block;
+   width: 100%;
+}
+
+.calendar-table tr {
+   display: grid;
+   grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-table th,
+.calendar-table td {
+   display: block;
+   border: 1px solid #64748b;
+}
+
+.calendar-table th {
+   padding: 8px;
+   background: #f1f5f9;
+   text-align: center;
+}
+
+.calendar-table td {
+   height: 110px;
+   min-height: 110px;
+   padding: 8px;
+   background: #ffffff;
+   vertical-align: top;
+   text-align: left;
+}

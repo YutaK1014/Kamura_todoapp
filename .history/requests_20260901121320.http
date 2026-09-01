@@ -38,37 +38,3 @@ GET https://holidays-jp.github.io/api/v1/date.json
 
 ###7,期限の範囲で絞れるようにする
 GET http://localhost:8080/api/todos?from=2026-09-01&to=2026-09-30
-
-
-### 就職活動の準備 1
-POST http://localhost:8080/api/todos
-Content-Type: application/json
-
-{
-  "title": "履歴書を見直す",
-  "category": "書類作成",
-  "priority": 1,
-  "dueDate": "2026-04-04"
-}
-
-### 就職活動の準備 2
-POST http://localhost:8080/api/todos
-Content-Type: application/json
-
-{
-  "title": "応募する会社を調べる",
-  "category": "企業研究",
-  "priority": 2,
-  "dueDate": "2026-04-04"
-}
-
-### 就職活動の準備 3
-POST http://localhost:8080/api/todos
-Content-Type: application/json
-
-{
-  "title": "面接で話す内容を準備する",
-  "category": "面接対策",
-  "priority": 1,
-  "dueDate": "2026-04-04"
-}

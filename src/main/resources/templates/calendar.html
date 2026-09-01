@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カレンダー</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <main class="container">
+        <h1 class="page-title">カレンダー</h1>
+
+        <nav class="calendar-navigation" aria-label="月の移動">
+            <a class="link" th:href="@{/calendar(year=${previousMonth.year}, month=${previousMonth.monthValue})}">前の月</a>
+            <h2 class="calendar-heading" th:text="${targetMonth.year + '年' + targetMonth.monthValue + '月'}">2026年4月</h2>
+            <a class="link" th:href="@{/calendar(year=${nextMonth.year}, month=${nextMonth.monthValue})}">次の月</a>
+        </nav>
+
+        <table class="calendar-table"
+               th:attr="data-from=${#temporals.format(firstDate, 'yyyy-MM-dd')}, data-to=${#temporals.format(lastDate, 'yyyy-MM-dd')}">
+            <thead>
+                <tr>
+                    <th scope="col">日</th>
+                    <th scope="col">月</th>
+                    <th scope="col">火</th>
+                    <th scope="col">水</th>
+                    <th scope="col">木</th>
+                    <th scope="col">金</th>
+                    <th scope="col">土</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="week : ${calendarWeeks}">
+                    <td th:each="date : ${week}"
+                        th:attr="data-date=${date != null ? #temporals.format(date, 'yyyy-MM-dd') : null}">
+                        <span th:if="${date != null}" th:text="${date.dayOfMonth}">1</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+    <script>
+        async function loadTodos() {
+            const calendar = document.querySelector('.calendar-table');
+            const from = calendar.dataset.from;
+            const to = calendar.dataset.to;
+            const res = await fetch(`/api/todos?from=${from}&to=${to}`);
+            const todos = await res.json();
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            calendar.querySelectorAll('td[data-date]').forEach(cell => {
+                const cellTodos = todos.filter(todo => todo.dueDate === cell.dataset.date);
+
+                cellTodos
+                    .slice(0, 3)
+                    .forEach(todo => {
+                        const title = document.createElement('div');
+                        title.textContent = todo.title;
+                        if (todo.dueDate < today && !todo.completed) {
+                            title.style.color = '#dc2626';
+                        }
+                        cell.appendChild(title);
+                    });
+
+                if (cellTodos.length > 3) {
+                    const other = document.createElement('div');
+                    other.textContent = `ほか ${cellTodos.length - 3}件`;
+                    cell.appendChild(other);
+                }
+            });
+        }
+
+        async function loadHolidays() {
+            const calendar = document.querySelector('.calendar-table');
+            const from = calendar.dataset.from;
+            const to = calendar.dataset.to;
+            const res = await fetch(`/api/holidays?from=${from}&to=${to}`);
+            const holidays = await res.json();
+
+            if (res.headers.has('X-Holidays-Unavailable')) {
+                const message = document.createElement('p');
+                message.textContent = '祝日を取れませんでした';
+                calendar.parentElement.insertBefore(message, calendar);
+            }
+
+            calendar.querySelectorAll('td[data-date]').forEach(cell => {
+                const date = new Date(`${cell.dataset.date}T00:00:00`);
+                const holidayName = holidays[cell.dataset.date];
+
+                if (holidayName) {
+                    cell.style.backgroundColor = '#fef3c7';
+                    cell.title = holidayName;
+                } else if (date.getDay() === 0) {
+                    cell.style.backgroundColor = '#fee2e2';
+                } else if (date.getDay() === 6) {
+                    cell.style.backgroundColor = '#dbeafe';
+                }
+            });
+        }
+
+        loadTodos();
+        loadHolidays();
+    </script>
+</body>
+</html>
