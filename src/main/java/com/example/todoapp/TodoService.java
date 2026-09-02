@@ -24,6 +24,16 @@ public class TodoService {
         return todoMapper.search(keyword, category, order, from, to);
     }
 
+    public List<Todo> searchPage(String keyword, String category, String order, boolean showCompleted,
+            int page, int pageSize) {
+        int offset = (page - 1) * pageSize;
+        return todoMapper.searchPage(keyword, category, order, showCompleted, offset, pageSize);
+    }
+
+    public int count(String keyword, String category, boolean showCompleted) {
+        return todoMapper.count(keyword, category, showCompleted);
+    }
+
     public Todo findById(Long id) {
         return todoMapper.findById(id);
     }

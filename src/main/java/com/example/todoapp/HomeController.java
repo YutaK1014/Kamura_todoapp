@@ -31,15 +31,25 @@ public class HomeController {
     @GetMapping("/todos")
     public String todos(@RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "") String category,
-            @RequestParam(defaultValue = "asc") String order, Model model) {
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(name = "showCompleted", defaultValue = "false") boolean showCompleted,
+            @RequestParam(defaultValue = "1") int page, Model model) {
         if (!"desc".equals(order)) {
             order = "asc";
         }
-        List<Todo> todos = todoService.search(keyword, category, order);
+        page = Math.max(page, 1);
+        int pageSize = 10;
+        int totalCount = todoService.count(keyword, category, showCompleted);
+        int totalPages = Math.max((totalCount + pageSize - 1) / pageSize, 1);
+        page = Math.min(page, totalPages);
+        List<Todo> todos = todoService.searchPage(keyword, category, order, showCompleted, page, pageSize);
         model.addAttribute("todos", todos);
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", category);
         model.addAttribute("order", order);
+        model.addAttribute("showCompleted", showCompleted);
+        model.addAttribute("page", page);
+        model.addAttribute("totalPages", totalPages);
         return "todos";
     }
 
