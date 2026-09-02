@@ -94,24 +94,3 @@ Accept: application/json, text/event-stream
     "clientInfo": { "name": "requests.http", "version": "1.0" }
   }
 }
-
-
-
-### 10. 道具の一覧をもらう
-POST http://localhost:8080/mcp
-Content-Type: application/json
-Accept: application/json, text/event-stream
-Mcp-Session-Id:5a115e9d-9612-4de1-ad91-e7233ee9f27c
-
-{ "jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {} }
-
-
-
-### 11. 道具を1つ呼んでみる
-POST http://localhost:8080/mcp
-Content-Type: application/json
-Accept: application/json, text/event-stream
-Mcp-Session-Id:5a115e9d-9612-4de1-ad91-e7233ee9f27c
-
-{ "jsonrpc": "2.0", "id": 3, "method": "tools/call",
-  "params": { "name": "list_todos", "arguments": {} } }
