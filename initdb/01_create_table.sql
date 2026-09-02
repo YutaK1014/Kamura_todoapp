@@ -6,6 +6,9 @@ CREATE TABLE todos (
     priority INT NOT NULL DEFAULT 2,
     due_date DATE NULL,
     completed BOOLEAN NOT NULL DEFAULT FALSE,
+    completed_at DATETIME NULL,
+    deleted_at DATETIME NULL,
+    pinned BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -19,6 +22,10 @@ CREATE TABLE todos (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
+
+UPDATE todos
+SET completed_at = '2026-04-05 00:00:00'
+WHERE id = 1 AND completed = TRUE;
 
 CREATE TABLE operation_logs (
     id BIGINT NOT NULL AUTO_INCREMENT,

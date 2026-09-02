@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.validation.Valid;
 
@@ -33,16 +34,18 @@ public class HomeController {
             @RequestParam(defaultValue = "") String category,
             @RequestParam(defaultValue = "asc") String order,
             @RequestParam(name = "showCompleted", defaultValue = "false") boolean showCompleted,
-            @RequestParam(defaultValue = "1") int page, Model model) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int trash, Model model) {
         if (!"desc".equals(order)) {
             order = "asc";
         }
         page = Math.max(page, 1);
         int pageSize = 10;
-        int totalCount = todoService.count(keyword, category, showCompleted);
+        boolean showTrash = trash == 1;
+        int totalCount = todoService.count(keyword, category, showCompleted, showTrash);
         int totalPages = Math.max((totalCount + pageSize - 1) / pageSize, 1);
         page = Math.min(page, totalPages);
-        List<Todo> todos = todoService.searchPage(keyword, category, order, showCompleted, page, pageSize);
+        List<Todo> todos = todoService.searchPage(keyword, category, order, showCompleted, showTrash, page, pageSize);
         model.addAttribute("todos", todos);
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", category);
@@ -50,6 +53,7 @@ public class HomeController {
         model.addAttribute("showCompleted", showCompleted);
         model.addAttribute("page", page);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("trash", trash);
         return "todos";
     }
 
@@ -130,6 +134,33 @@ public class HomeController {
         model.addAttribute("todo", todo);
         model.addAttribute("id", id);
         return "delete";
+    }
+
+    @PostMapping("/todos/{id}/pin")
+    public String togglePinned(@PathVariable Long id,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String category,
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(name = "showCompleted", defaultValue = "false") boolean showCompleted,
+            @RequestParam(defaultValue = "0") int trash,
+            @RequestParam(defaultValue = "1") int page) {
+        todoService.togglePinned(id);
+        return UriComponentsBuilder.fromPath("/todos")
+                .queryParam("keyword", keyword)
+                .queryParam("category", category)
+                .queryParam("order", order)
+                .queryParam("showCompleted", showCompleted)
+                .queryParam("trash", trash)
+                .queryParam("page", page)
+                .build()
+                .toUriString();
+    }
+
+    @PostMapping("/todos/{id}/restore")
+    public String restore(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        todoService.restore(id);
+        redirectAttributes.addFlashAttribute("message", "Todoを戻しました");
+        return "redirect:/todos?trash=1";
     }
 
     @PostMapping("/todos/{id}/delete")

@@ -5,9 +5,10 @@
 <mapper namespace="com.example.todoapp.TodoMapper">
 
     <select id="search" resultType="com.example.todoapp.Todo">
-        SELECT id, title, detail, category, priority, due_date, completed, created_at, updated_at
+        SELECT id, title, detail, category, priority, due_date, completed, completed_at, deleted_at, pinned, created_at, updated_at
         FROM todos
         <where>
+            AND deleted_at IS NULL
             <if test="keyword != null and keyword != ''">
                 AND title LIKE CONCAT('%', #{keyword}, '%')
             </if>
@@ -21,7 +22,7 @@
                 AND due_date &lt;= #{to}
             </if>
         </where>
-        ORDER BY due_date IS NULL ASC,
+        ORDER BY pinned DESC, due_date IS NULL ASC,
         <choose>
             <when test="order == 'desc'">due_date DESC</when>
             <otherwise>due_date ASC</otherwise>
@@ -29,20 +30,24 @@
     </select>
 
     <select id="searchPage" resultType="com.example.todoapp.Todo">
-        SELECT id, title, detail, category, priority, due_date, completed, created_at, updated_at
+        SELECT id, title, detail, category, priority, due_date, completed, completed_at, deleted_at, pinned, created_at, updated_at
         FROM todos
         <where>
+            <choose>
+                <when test="trash">AND deleted_at IS NOT NULL</when>
+                <otherwise>AND deleted_at IS NULL</otherwise>
+            </choose>
             <if test="keyword != null and keyword != ''">
                 AND title LIKE CONCAT('%', #{keyword}, '%')
             </if>
             <if test="category != null and category != ''">
                 AND category = #{category}
             </if>
-            <if test="!showCompleted">
+            <if test="!showCompleted and !trash">
                 AND completed = FALSE
             </if>
         </where>
-        ORDER BY due_date IS NULL ASC,
+        ORDER BY pinned DESC, due_date IS NULL ASC,
         <choose>
             <when test="order == 'desc'">due_date DESC</when>
             <otherwise>due_date ASC</otherwise>
@@ -54,27 +59,31 @@
         SELECT COUNT(*)
         FROM todos
         <where>
+            <choose>
+                <when test="trash">AND deleted_at IS NOT NULL</when>
+                <otherwise>AND deleted_at IS NULL</otherwise>
+            </choose>
             <if test="keyword != null and keyword != ''">
                 AND title LIKE CONCAT('%', #{keyword}, '%')
             </if>
             <if test="category != null and category != ''">
                 AND category = #{category}
             </if>
-            <if test="!showCompleted">
+            <if test="!showCompleted and !trash">
                 AND completed = FALSE
             </if>
         </where>
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO todos (title, detail, category, priority, due_date, completed)
-        VALUES (#{title}, #{detail}, #{category}, #{priority}, #{dueDate}, COALESCE(#{completed}, FALSE))
+        INSERT INTO todos (title, detail, category, priority, due_date, completed, completed_at)
+        VALUES (#{title}, #{detail}, #{category}, #{priority}, #{dueDate}, COALESCE(#{completed}, FALSE), NULL)
     </insert>
 
     <select id="findById" resultType="com.example.todoapp.Todo">
-        SELECT id, title, detail, category, priority, due_date, completed, created_at, updated_at
+        SELECT id, title, detail, category, priority, due_date, completed, completed_at, deleted_at, pinned, created_at, updated_at
         FROM todos
-        WHERE id = #{id}
+        WHERE id = #{id} AND deleted_at IS NULL
     </select>
 
     <update id="update">
@@ -84,12 +93,30 @@
             category = #{category},
             priority = #{priority},
             due_date = #{dueDate},
+            completed_at = CASE
+                WHEN completed = FALSE AND #{completed} = TRUE THEN CURRENT_TIMESTAMP
+                WHEN completed = TRUE AND #{completed} = FALSE THEN NULL
+                ELSE completed_at
+            END,
             completed = #{completed}
         WHERE id = #{id}
     </update>
 
-    <delete id="deleteById">
-        DELETE FROM todos
-        WHERE id = #{id}
-    </delete>
+    <update id="deleteById">
+        UPDATE todos
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE id = #{id} AND deleted_at IS NULL
+    </update>
+
+    <update id="togglePinned">
+        UPDATE todos
+        SET pinned = NOT pinned
+        WHERE id = #{id} AND deleted_at IS NULL
+    </update>
+
+    <update id="restoreById">
+        UPDATE todos
+        SET deleted_at = NULL
+        WHERE id = #{id} AND deleted_at IS NOT NULL
+    </update>
 </mapper>

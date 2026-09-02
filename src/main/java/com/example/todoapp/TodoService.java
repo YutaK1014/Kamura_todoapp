@@ -25,13 +25,13 @@ public class TodoService {
     }
 
     public List<Todo> searchPage(String keyword, String category, String order, boolean showCompleted,
-            int page, int pageSize) {
+            boolean trash, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
-        return todoMapper.searchPage(keyword, category, order, showCompleted, offset, pageSize);
+        return todoMapper.searchPage(keyword, category, order, showCompleted, trash, offset, pageSize);
     }
 
-    public int count(String keyword, String category, boolean showCompleted) {
-        return todoMapper.count(keyword, category, showCompleted);
+    public int count(String keyword, String category, boolean showCompleted, boolean trash) {
+        return todoMapper.count(keyword, category, showCompleted, trash);
     }
 
     public Todo findById(Long id) {
@@ -46,6 +46,14 @@ public class TodoService {
     public void update(Todo todo) {
         todoMapper.update(todo);
         log.info("Todoの編集が正常に完了しました。 id={}", todo.getId());
+    }
+
+    public void togglePinned(Long id) {
+        todoMapper.togglePinned(id);
+    }
+
+    public void restore(Long id) {
+        todoMapper.restoreById(id);
     }
 
     public void delete(Long id) {
