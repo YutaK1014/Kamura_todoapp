@@ -236,6 +236,22 @@ body {
    outline: 3px solid #1e3a5f;
 }
 
+/* Keep the completion label and checkbox together on one line. */
+.form-row:has(#completed) {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+}
+
+.form-row:has(#completed) .form-label {
+   margin: 0;
+}
+
+.form-row:has(#completed) #completed.form-input {
+   width: auto;
+   margin: 0;
+}
+
 input[type="date"] {
    color-scheme: dark;
 }

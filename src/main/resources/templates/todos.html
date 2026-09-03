@@ -37,6 +37,7 @@
         <h1 class="page-title">ToDo一覧</h1>
 
         <p class="flash" th:if="${message != null}" th:text="${message}"></p>
+        <p id="today-weather" aria-live="polite"></p>
 
         <p><a class="link" href="/todos/new">新規登録</a> <a class="link" href="/calendar">カレンダーで見る</a></p>
 
@@ -126,5 +127,23 @@
                th:classappend="${pageNumber == page ? ' current' : ''}">1</a>
         </nav>
     </main>
+    <script>
+        async function loadTodayWeather() {
+            const weatherElement = document.querySelector('#today-weather');
+            try {
+                const response = await fetch('/api/weather');
+                const weather = await response.json();
+                if (!response.ok || response.headers.has('X-Weather-Unavailable')
+                        || weather.temperature === undefined) {
+                    return;
+                }
+                weatherElement.textContent = `今日の天気（東京）：${weather.description}、${weather.temperature}℃`;
+            } catch (error) {
+                // 天気が取れなくても、Todo一覧の表示は続ける。
+            }
+        }
+
+        loadTodayWeather();
+    </script>
 </body>
 </html>
