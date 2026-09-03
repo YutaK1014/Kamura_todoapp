@@ -85,7 +85,10 @@
             <tbody>
                 <tr th:each="todo : ${todos}"
                     th:classappend="${todo.dueDate != null and todo.dueDate.isBefore(T(java.time.LocalDate).now()) and todo.completed == false ? ' overdue' : ''}">
-                    <td th:text="${todo.title}">やること</td>
+                    <td>
+                        <span th:if="${todo.pinned == true}" aria-label="ブックマーク">🔖 </span>
+                        <span th:text="${todo.title}">やること</span>
+                    </td>
                     <td th:text="${todo.category}">ジャンル</td>
                     <td>
                         <span th:text="${todo.priority == 1 ? '高' : (todo.priority == 2 ? '中' : '低')}">優先度</span>

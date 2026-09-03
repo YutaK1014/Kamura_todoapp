@@ -167,7 +167,7 @@ public class HomeController {
             @RequestParam(defaultValue = "0") int trash,
             @RequestParam(defaultValue = "1") int page) {
         todoService.togglePinned(id);
-        return UriComponentsBuilder.fromPath("/todos")
+        return "redirect:" + UriComponentsBuilder.fromPath("/todos")
                 .queryParam("keyword", keyword)
                 .queryParam("category", category)
                 .queryParam("order", order)
