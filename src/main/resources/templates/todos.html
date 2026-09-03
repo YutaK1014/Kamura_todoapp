@@ -8,6 +8,32 @@
 </head>
 <body>
     <main class="container">
+        <section class="experience-card" aria-label="経験値">
+            <div class="experience-header">
+                <div class="rank-info">
+                    <div>
+                        <div class="rank-name" th:text="${experienceRank}">Platinum</div>
+                        <div class="rank-caption">現在のティア</div>
+                    </div>
+                </div>
+                <div class="points-info">
+                    <div class="points-total"><span th:text="${experiencePoints}">601</span> <small>pt</small></div>
+                    <div class="points-caption">通期ポイント</div>
+                </div>
+                    <div class="points-caption">通期ポイント</div>
+                </div>
+            </div>
+            <div class="experience-labels">
+                <span th:text="${experienceRank}">Platinum</span>
+                <span th:text="${nextExperienceRank + ' (' + nextExperience + 'pt)'}">Diamond (800pt)</span>
+            </div>
+            <div class="experience-bar" style="display:block;width:100%;height:14px;min-height:14px;background:#475569;border-radius:999px;overflow:hidden;" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                 th:aria-valuenow="${experienceProgress}">
+                <span style="display:block;height:100%;background:#22d3ee;border-radius:999px;" th:style="'width: ' + ${experienceProgress} + '%;display:block;height:100%;background:#22d3ee;border-radius:999px'" aria-hidden="true"></span>
+            </div>
+            <div class="experience-progress-text" th:text="${experienceProgress + '% 達成'}">0% 達成</div>
+            <div class="experience-remaining" th:text="${experienceRemaining > 0 ? 'あと ' + experienceRemaining + 'pt' : '最高ランク'}">あと 199pt</div>
+        </section>
         <h1 class="page-title">ToDo一覧</h1>
 
         <p class="flash" th:if="${message != null}" th:text="${message}"></p>

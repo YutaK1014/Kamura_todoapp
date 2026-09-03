@@ -29,6 +29,98 @@ body {
    font-size: 28px;
 }
 
+.experience-card {
+   margin-bottom: 24px;
+   border-radius: 12px;
+   padding: 18px 20px 14px;
+   background: #1e293b;
+   color: #e2e8f0;
+}
+
+.experience-header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 16px;
+}
+
+.rank-info {
+   display: flex;
+   align-items: center;
+   gap: 14px;
+}
+
+.rank-name {
+   color: #0284c7;
+   font-size: 20px;
+   font-weight: bold;
+   line-height: 1.2;
+}
+
+.rank-caption,
+.points-caption {
+   color: #cbd5e1;
+   font-size: 13px;
+}
+
+.points-info {
+   text-align: right;
+}
+
+.experience-header > .points-caption {
+   display: none;
+}
+
+.points-total {
+   color: #f8fafc;
+   font-size: 28px;
+   line-height: 1.1;
+}
+
+.points-total small {
+   font-size: 14px;
+}
+
+.experience-labels {
+   display: flex;
+   justify-content: space-between;
+   margin-top: 16px;
+   color: #cbd5e1;
+   font-size: 14px;
+}
+
+.experience-bar {
+   display: block;
+   width: 100%;
+   height: 13px;
+   min-height: 13px;
+   overflow: hidden;
+   border: 1px solid #64748b;
+   border-radius: 999px;
+   background: #475569;
+}
+
+.experience-bar span {
+   display: block;
+   height: 100%;
+   border-radius: inherit;
+   background: #22d3ee;
+}
+
+.experience-remaining {
+   margin-top: 4px;
+   color: #94a3b8;
+   font-size: 13px;
+   text-align: right;
+}
+
+.experience-progress-text {
+   margin-top: 3px;
+   color: #cbd5e1;
+   font-size: 12px;
+   text-align: right;
+}
+
 .todo-table {
    width: 100%;
    border: 1px solid #64748b;
@@ -305,16 +397,49 @@ body {
 }
 
 .calendar-table th {
-   padding: 8px;
+   padding: 6px 8px;
    background: #334155;
    text-align: center;
+   font-size: 14px;
 }
 
 .calendar-table td {
-   height: 110px;
-   min-height: 110px;
-   padding: 8px;
+   height: 96px;
+   min-height: 96px;
+   padding: 6px;
    background: #1e293b;
    vertical-align: top;
    text-align: left;
+}
+
+.calendar-table td > span:first-child {
+   display: block;
+   margin-bottom: 3px;
+   color: #f8fafc;
+   font-weight: bold;
+   line-height: 1.2;
+}
+
+.calendar-table td .link {
+   display: block;
+   margin: 2px 0;
+   border-radius: 4px;
+   padding: 2px 4px;
+   color: #bfdbfe;
+   font-size: 13px;
+   line-height: 1.35;
+   overflow-wrap: anywhere;
+}
+
+.calendar-table td .link:hover {
+   background: #334155;
+}
+
+.calendar-table[data-view="week"] td {
+   height: 220px;
+   min-height: 220px;
+}
+
+.calendar-table[data-view="week"] td .link {
+   font-size: 14px;
 }

@@ -5,15 +5,18 @@ import java.time.LocalDate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 public class TodoService {
 
     private final TodoMapper todoMapper;
+    private final ExperienceMapper experienceMapper;
 
-    public TodoService(TodoMapper todoMapper) {
+    public TodoService(TodoMapper todoMapper, ExperienceMapper experienceMapper) {
         this.todoMapper = todoMapper;
+        this.experienceMapper = experienceMapper;
     }
 
     public List<Todo> search(String keyword, String category, String order) {
@@ -48,9 +51,29 @@ public class TodoService {
         log.info("Todoの登録が正常に完了しました。 id={}", todo.getId());
     }
 
+    @Transactional
     public void update(Todo todo) {
+        Todo existingTodo = todoMapper.findById(todo.getId());
         todoMapper.update(todo);
+        if (existingTodo != null
+                && !Boolean.TRUE.equals(existingTodo.getCompleted())
+                && Boolean.TRUE.equals(todo.getCompleted())) {
+            experienceMapper.addPoints(experiencePointsFor(todo.getPriority()));
+        }
         log.info("Todoの編集が正常に完了しました。 id={}", todo.getId());
+    }
+
+    public int getExperiencePoints() {
+        return experienceMapper.getTotalPoints();
+    }
+
+    private int experiencePointsFor(Integer priority) {
+        return switch (priority) {
+            case 1 -> 30;
+            case 2 -> 20;
+            case 3 -> 10;
+            default -> throw new IllegalArgumentException("priority must be 1, 2, or 3");
+        };
     }
 
     public void togglePinned(Long id) {

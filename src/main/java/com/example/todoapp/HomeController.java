@@ -18,6 +18,9 @@ import jakarta.validation.Valid;
 @Controller
 public class HomeController {
 
+    private static final int[] RANK_THRESHOLDS = {0, 100, 300, 500, 800};
+    private static final String[] RANK_NAMES = {"Bronze", "Silver", "Gold", "Platinum", "Diamond"};
+
     private final TodoService todoService;
 
     public HomeController(TodoService todoService) {
@@ -54,6 +57,25 @@ public class HomeController {
         model.addAttribute("page", page);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("trash", trash);
+        int experiencePoints = todoService.getExperiencePoints();
+        int rankIndex = 0;
+        for (int i = 0; i < RANK_THRESHOLDS.length; i++) {
+            if (experiencePoints >= RANK_THRESHOLDS[i]) {
+                rankIndex = i;
+            }
+        }
+        int nextRankIndex = Math.min(rankIndex + 1, RANK_NAMES.length - 1);
+        int nextExperience = RANK_THRESHOLDS[nextRankIndex];
+        int progress = nextRankIndex == rankIndex
+                ? 100
+                : Math.min(100, experiencePoints * 100 / nextExperience);
+
+        model.addAttribute("experiencePoints", experiencePoints);
+        model.addAttribute("experienceRank", RANK_NAMES[rankIndex]);
+        model.addAttribute("nextExperienceRank", RANK_NAMES[nextRankIndex]);
+        model.addAttribute("nextExperience", nextExperience);
+        model.addAttribute("experienceProgress", progress);
+        model.addAttribute("experienceRemaining", Math.max(0, nextExperience - experiencePoints));
         return "todos";
     }
 
