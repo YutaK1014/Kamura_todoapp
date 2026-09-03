@@ -55,6 +55,31 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <select id="searchForExport" resultType="com.example.todoapp.Todo">
+        SELECT id, title, detail, category, priority, due_date, completed, completed_at, deleted_at, pinned, created_at, updated_at
+        FROM todos
+        <where>
+            <choose>
+                <when test="trash">AND deleted_at IS NOT NULL</when>
+                <otherwise>AND deleted_at IS NULL</otherwise>
+            </choose>
+            <if test="keyword != null and keyword != ''">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="!showCompleted and !trash">
+                AND completed = FALSE
+            </if>
+        </where>
+        ORDER BY pinned DESC, due_date IS NULL ASC,
+        <choose>
+            <when test="order == 'desc'">due_date DESC</when>
+            <otherwise>due_date ASC</otherwise>
+        </choose>
+    </select>
+
     <select id="count" resultType="int">
         SELECT COUNT(*)
         FROM todos

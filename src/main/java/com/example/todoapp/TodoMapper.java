@@ -16,6 +16,10 @@ public interface TodoMapper {
             @Param("order") String order, @Param("showCompleted") boolean showCompleted,
             @Param("trash") boolean trash, @Param("offset") int offset, @Param("limit") int limit);
 
+    List<Todo> searchForExport(@Param("keyword") String keyword, @Param("category") String category,
+            @Param("order") String order, @Param("showCompleted") boolean showCompleted,
+            @Param("trash") boolean trash);
+
     int count(@Param("keyword") String keyword, @Param("category") String category,
             @Param("showCompleted") boolean showCompleted, @Param("trash") boolean trash);
 

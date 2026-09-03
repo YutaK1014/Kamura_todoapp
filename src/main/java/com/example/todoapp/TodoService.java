@@ -30,6 +30,11 @@ public class TodoService {
         return todoMapper.searchPage(keyword, category, order, showCompleted, trash, offset, pageSize);
     }
 
+    public List<Todo> searchForExport(String keyword, String category, String order,
+            boolean showCompleted, boolean trash) {
+        return todoMapper.searchForExport(keyword, category, order, showCompleted, trash);
+    }
+
     public int count(String keyword, String category, boolean showCompleted, boolean trash) {
         return todoMapper.count(keyword, category, showCompleted, trash);
     }

@@ -15,15 +15,30 @@ public class CalendarController {
 
     @GetMapping("/calendar")
     public String calendar(@RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month, Model model) {
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer day,
+            @RequestParam(defaultValue = "month") String view, Model model) {
         LocalDate today = LocalDate.now();
+        if (!"week".equals(view)) {
+            view = "month";
+        }
         YearMonth targetMonth = YearMonth.of(
                 year != null ? year : today.getYear(),
                 month != null ? month : today.getMonthValue());
 
-        LocalDate firstDate = targetMonth.atDay(1);
-        LocalDate lastDate = targetMonth.atEndOfMonth();
-        List<List<LocalDate>> calendarWeeks = createCalendarWeeks(targetMonth, firstDate);
+        LocalDate firstDate;
+        LocalDate lastDate;
+        List<List<LocalDate>> calendarWeeks;
+        if ("week".equals(view)) {
+            LocalDate targetDate = day == null ? targetMonth.atDay(1) : targetMonth.atDay(day);
+            firstDate = targetDate.minusDays(targetDate.getDayOfWeek().getValue() % 7);
+            lastDate = firstDate.plusDays(6);
+            calendarWeeks = createWeek(firstDate);
+        } else {
+            firstDate = targetMonth.atDay(1);
+            lastDate = targetMonth.atEndOfMonth();
+            calendarWeeks = createCalendarWeeks(targetMonth, firstDate);
+        }
 
         YearMonth previousMonth = targetMonth.minusMonths(1);
         YearMonth nextMonth = targetMonth.plusMonths(1);
@@ -34,7 +49,21 @@ public class CalendarController {
         model.addAttribute("calendarWeeks", calendarWeeks);
         model.addAttribute("previousMonth", previousMonth);
         model.addAttribute("nextMonth", nextMonth);
+        model.addAttribute("view", view);
+        model.addAttribute("weekStart", firstDate);
+        model.addAttribute("previousWeekStart", firstDate.minusDays(7));
+        model.addAttribute("nextWeekStart", firstDate.plusDays(7));
         return "calendar";
+    }
+
+    private List<List<LocalDate>> createWeek(LocalDate weekStart) {
+        List<LocalDate> week = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            week.add(weekStart.plusDays(i));
+        }
+        List<List<LocalDate>> calendarWeeks = new ArrayList<>();
+        calendarWeeks.add(week);
+        return calendarWeeks;
     }
 
     private List<List<LocalDate>> createCalendarWeeks(YearMonth targetMonth, LocalDate firstDate) {
