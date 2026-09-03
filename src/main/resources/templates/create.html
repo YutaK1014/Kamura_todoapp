@@ -49,7 +49,9 @@
 
             <div class="form-row">
                 <label class="form-label" for="dueDate">期限</label>
-                <input class="form-input" type="date" id="dueDate" th:field="*{dueDate}">
+                <div class="date-input-group">
+                    <input class="form-input" type="date" id="dueDate" th:field="*{dueDate}">
+                </div>
             </div>
 
             <button class="btn" type="submit">確認する</button>

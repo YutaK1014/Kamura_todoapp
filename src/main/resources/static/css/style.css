@@ -236,6 +236,16 @@ body {
    outline: 3px solid #1e3a5f;
 }
 
+input[type="date"] {
+   color-scheme: dark;
+}
+
+.date-input-group {
+   display: flex;
+   align-items: stretch;
+   gap: 8px;
+}
+
 .search-bar .form-input {
    width: auto;
 }
@@ -375,7 +385,7 @@ body {
    width: 100%;
    border-collapse: collapse;
    table-layout: fixed;
-   border: 2px solid #94a3b8;
+   border: 2px solid #475569;
 }
 
 .calendar-table thead,
@@ -393,12 +403,13 @@ body {
 .calendar-table th,
 .calendar-table td {
    display: block;
-   border: 1px solid #94a3b8;
+   border: 1px solid #64748b;
 }
 
 .calendar-table th {
    padding: 6px 8px;
-   background: #334155;
+   background: #dbeafe;
+   color: #1e293b;
    text-align: center;
    font-size: 14px;
 }
@@ -407,7 +418,8 @@ body {
    height: 96px;
    min-height: 96px;
    padding: 6px;
-   background: #1e293b;
+   background: #f8fafc;
+   color: #1e293b;
    vertical-align: top;
    text-align: left;
 }
@@ -415,7 +427,7 @@ body {
 .calendar-table td > span:first-child {
    display: block;
    margin-bottom: 3px;
-   color: #f8fafc;
+   color: #0f172a;
    font-weight: bold;
    line-height: 1.2;
 }
@@ -425,14 +437,14 @@ body {
    margin: 2px 0;
    border-radius: 4px;
    padding: 2px 4px;
-   color: #bfdbfe;
+   color: #1d4ed8;
    font-size: 13px;
    line-height: 1.35;
    overflow-wrap: anywhere;
 }
 
 .calendar-table td .link:hover {
-   background: #334155;
+   background: #dbeafe;
 }
 
 .calendar-table[data-view="week"] td {
